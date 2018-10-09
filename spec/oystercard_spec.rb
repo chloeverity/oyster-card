@@ -26,83 +26,59 @@ let (:station) { double :station }
     it 'should default as false' do
       expect(subject.in_journey?).to eq false
     end
+
+    it 'should return true during a journey' do
+      subject.instance_variable_set(:@balance, 10)
+      subject.touch_in(station)
+      expect(subject.in_journey?).to eq true
+    end
+
+    it 'should return false after a journey is complete' do
+      subject.instance_variable_set(:@balance, 10)
+      subject.touch_in(station)
+      subject.touch_out(station)
+      expect(subject.in_journey?).to eq false
+    end
   end
 
   describe '#touch_in' do
+    #before { subject.instance_variable_set(:@balance, 10) }
+    it 'should reduce balance by penalty amount if no check out before check in' do
+      subject.instance_variable_set(:@balance, 10)
+      subject.instance_variable_set(:@in_journey, true)
+      expect { subject.touch_in(station) }.to change{ subject.balance }.by(-6)
+    end
+
     it 'should set oystercard to in journey' do
+      subject.instance_variable_set(:@balance, 10)
       subject.touch_in(station)
       expect(subject).to be_in_journey
     end
 
-    it 'should record the entry station' do
-      subject.instance_variable_set(:@balance, 10)
-      subject.touch_in(station)
-      expect(subject.entry_station).to eq station
+    it 'raises an error if insufficient funds' do
+      expect { subject.touch_in(station) }.to raise_error("Insufficient funds")
     end
-
-    it 'should add Entry Station to journeys hash' do
-      subject.instance_variable_set(:@balance, 10)
-      subject.instance_variable_set(:@entry_station, station)
-      subject.touch_in(station)
-      expect(subject.journey_history[0]).to eq ({'Entry Station' => station})
-
-    end
-
   end
 
   describe '#touch_out' do
-
-    it 'deducts the fare from the balance on the oystercard' do
-      subject.instance_variable_set(:@balance, 10)
-      subject.instance_variable_set(:@journey_history, [{}])
-      subject.touch_out(5, station)
-      expect(subject.balance).to eq 5
-    end
-
-    it 'raises an error if insufficient funds' do
-      min = OysterCard::DEFAULT_MIN_BALANCE
-      subject.instance_variable_set(:@journey_history, [{}])
-      expect { subject.touch_out(min + 1, station) }.to raise_error("Insufficient funds")
-    end
-
-
-    it 'should set oystercard to not in journey' do
-      subject.instance_variable_set(:@balance, 10)
-      subject.instance_variable_set(:@journey_history, [{}])
-      subject.touch_out(1, station)
-      expect(subject).not_to be_in_journey
-    end
-
     it 'should reduce balance by journey amount' do
       subject.instance_variable_set(:@balance, 10)
-      subject.instance_variable_set(:@journey_history, [{}])
-      expect { subject.touch_out(1, station) }.to change{ subject.balance }.by(-1)
+      subject.touch_in(station)
+      expect { subject.touch_out(station) }.to change{ subject.balance }.by(-1)
     end
 
-    it 'should reset entry_station to nil' do
+    it 'should reduce balance by penalty amount if no check in' do
       subject.instance_variable_set(:@balance, 10)
-      subject.instance_variable_set(:@entry_station, station)
-      subject.instance_variable_set(:@journey_history, [{}])
-      subject.touch_out(1, station)
-      expect(subject.entry_station).to eq nil
+      expect { subject.touch_out(station) }.to change{ subject.balance }.by(-6)
     end
-
-    it 'should add exit station to journey hash' do
-      subject.instance_variable_set(:@balance, 10)
-      subject.instance_variable_set(:@entry_station, station)
-      subject.instance_variable_set(:@journey_history, [{'Entry Station' => 'Euston'}])
-      subject.touch_out(1, station)
-      expect(subject.journey_history[0]).to eq ({'Entry Station' => 'Euston', 'Exit Station' => station})
-    end
-
   end
 
-  describe '#journey_history_list' do
-    it 'should print list of previous journey' do
-      list = 'Entry Station: Euston, Exit Station: Charing Cross'
-      hash_list = [{'Entry Station' => 'Euston', 'Exit Station' => 'Charing Cross'}]
-      subject.instance_variable_set(:@journey_history, hash_list)
-      expect(subject.journey_history_list).to eq [list]
+  describe '#add_journey_info' do
+    it 'should add journey_info to journey history' do
+      subject.instance_variable_set(:@balance, 10)
+      subject.touch_in(station)
+      subject.touch_out(station)
+      expect(subject.journey_history[0]).to eq ({entry: station, exit: station})
     end
   end
 

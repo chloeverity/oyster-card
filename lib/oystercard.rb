@@ -1,14 +1,17 @@
+require 'journey'
+
 class OysterCard
 
   DEFAULT_MAX_BALANCE = 90
   DEFAULT_MIN_BALANCE = 1
-
+  PENALTY_FARE = Journey::PENALTY_FARE
 
   attr_reader :balance, :entry_station, :journey_history
 
   def initialize
     @balance = 0
     @journey_history = []
+    @in_journey = false
   end
 
   def top_up(amount)
@@ -18,30 +21,35 @@ class OysterCard
   end
 
   def in_journey?
-    @entry_station != nil
+    @in_journey
   end
 
   def touch_in(station)
-    @entry_station = station
-    @journey_history << { 'Entry Station' => station }
+    deduct(PENALTY_FARE) if in_journey?
+    raise("Insufficient funds") if @balance < DEFAULT_MIN_BALANCE
+    @new_journey = Journey.new
+    @new_journey.start(station)
+    @in_journey = true
+    #@entry_station = station
+    #@journey_history << { 'Entry Station' => station }
   end
 
-  def touch_out(fare=1, station)
-    deduct(fare)
-    @entry_station = nil
-    @journey_history[-1]['Exit Station'] = station
+  def touch_out(station)
+    @new_journey ||= Journey.new
+    @new_journey.end(station)
+    deduct(@new_journey.fare)
+    @in_journey = false
+    add_journey_info 
+  #  @entry_station = nil
+  #  @journey_history[-1]['Exit Station'] = station
   end
 
-  def journey_history_list
-    return @journey_history.map do |journey|
-      "Entry Station: #{journey['Entry Station']}, Exit Station: #{journey['Exit Station']}"
-    end
+  def add_journey_info
+    @journey_history << @new_journey.journey_info
   end
 
   private
-
   def deduct(amount)
-    raise("Insufficient funds") if @balance < DEFAULT_MIN_BALANCE
     @balance -= amount
   end
 
