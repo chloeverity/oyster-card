@@ -39,7 +39,7 @@ class OysterCard
     @new_journey.end(station)
     deduct(@new_journey.fare)
     @in_journey = false
-    add_journey_info 
+    add_journey_info
   #  @entry_station = nil
   #  @journey_history[-1]['Exit Station'] = station
   end
