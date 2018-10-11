@@ -5,7 +5,7 @@ class JourneyLog
     @journey_history = []
   end
 
-  attr_reader :journey_class, :new_journey
+  attr_reader :new_journey
 
   def begin(station)
     @new_journey = Journey.new
@@ -18,6 +18,11 @@ class JourneyLog
     log
   end
 
+  def journey_history
+    @journey_history.dup
+  end
+
+private
   def log
     @journey_history << @new_journey.journey_info
   end

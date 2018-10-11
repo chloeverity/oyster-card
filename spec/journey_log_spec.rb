@@ -17,4 +17,11 @@ describe JourneyLog do
     end
   end
 
+  describe "#log" do
+    it "logs all the journeys" do
+    subject.begin("station1")
+    subject.finish("station2")
+    expect(subject.journey_history).to eq [{entry: "station1", exit: "station2"}]
+    end 
+  end
 end
