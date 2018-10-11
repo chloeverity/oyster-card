@@ -1,4 +1,5 @@
 require 'journey'
+require 'journey_log'
 
 class OysterCard
 
@@ -10,8 +11,8 @@ class OysterCard
 
   def initialize
     @balance = 0
-    @journey_history = []
     @in_journey = false
+    @journey_log = JourneyLog.new
   end
 
   def top_up(amount)
@@ -39,13 +40,8 @@ class OysterCard
     @new_journey.end(station)
     deduct(@new_journey.fare)
     @in_journey = false
-    add_journey_info
   #  @entry_station = nil
   #  @journey_history[-1]['Exit Station'] = station
-  end
-
-  def add_journey_info
-    @journey_history << @new_journey.journey_info
   end
 
   private

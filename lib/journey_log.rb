@@ -5,7 +5,7 @@ class JourneyLog
     @journey_history = []
   end
 
-  attr_reader :new_journey
+  attr_reader :new_journey, :journey_fare
 
   def begin(station)
     @new_journey = Journey.new

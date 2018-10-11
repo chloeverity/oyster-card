@@ -73,13 +73,4 @@ let (:station) { double :station }
     end
   end
 
-  describe '#add_journey_info' do
-    it 'should add journey_info to journey history' do
-      subject.instance_variable_set(:@balance, 10)
-      subject.touch_in(station)
-      subject.touch_out(station)
-      expect(subject.journey_history[0]).to eq ({entry: station, exit: station})
-    end
-  end
-
 end

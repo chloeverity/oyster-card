@@ -7,7 +7,7 @@ class Journey
     @exit_station = nil
   end
 
-  attr_reader :entry_station, :exit_station
+  attr_reader :entry_station, :exit_station, :fare
 
   def start(station)
     @entry_station = station
